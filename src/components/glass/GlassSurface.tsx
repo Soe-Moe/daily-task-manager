@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Platform, StyleProp } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
+import { LiquidGlassView, isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useTheme } from '@/utils/useTheme';
 
 export type GlassVariant = 'card' | 'bar' | 'sheet' | 'pill';
@@ -23,6 +24,8 @@ export interface GlassSurfaceProps {
   bordered?: boolean;
   elevated?: boolean;
   padded?: boolean;
+  /** Grows and shimmers on touch. Use for tappable glass surfaces (only affects real native glass). */
+  interactive?: boolean;
 }
 
 const VARIANT_BLUR: Record<GlassVariant, { light: GlassBlurType; dark: GlassBlurType; amount: number }> = {
@@ -32,6 +35,14 @@ const VARIANT_BLUR: Record<GlassVariant, { light: GlassBlurType; dark: GlassBlur
   pill: { light: 'materialLight', dark: 'materialDark', amount: 20 },
 };
 
+const shadowStyle = (shadowColor: string): ViewStyle => ({
+  shadowColor,
+  shadowOffset: { width: 0, height: 10 },
+  shadowOpacity: 1,
+  shadowRadius: 24,
+  elevation: 8,
+});
+
 export const GlassSurface: React.FC<GlassSurfaceProps> = ({
   children,
   style,
@@ -40,23 +51,50 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
   bordered = true,
   elevated = true,
   padded = true,
+  interactive = false,
 }) => {
   const { isDark, colors } = useTheme();
+
+  const border = bordered ? (
+    <View
+      pointerEvents="none"
+      style={[
+        StyleSheet.absoluteFill,
+        {
+          borderRadius: radius,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: colors.glassBorder,
+        },
+      ]}
+    />
+  ) : null;
+
+  const content = <View style={padded ? styles.content : styles.contentBare}>{children}</View>;
+
+  if (isLiquidGlassSupported) {
+    return (
+      <View
+        style={[{ borderRadius: radius }, elevated && shadowStyle(colors.glassShadow), style]}
+      >
+        <LiquidGlassView
+          style={[styles.clip, { borderRadius: radius }]}
+          effect="regular"
+          interactive={interactive}
+          tintColor={colors.glassTint}
+          colorScheme={isDark ? 'dark' : 'light'}
+        >
+          {border}
+          {content}
+        </LiquidGlassView>
+      </View>
+    );
+  }
+
   const blurConfig = VARIANT_BLUR[variant];
 
   return (
     <View
-      style={[
-        { borderRadius: radius },
-        elevated && {
-          shadowColor: colors.glassShadow,
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 1,
-          shadowRadius: 24,
-          elevation: 8,
-        },
-        style,
-      ]}
+      style={[{ borderRadius: radius }, elevated && shadowStyle(colors.glassShadow), style]}
     >
       <View style={[styles.clip, { borderRadius: radius }]}>
         <BlurView
@@ -70,24 +108,12 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
           pointerEvents="none"
           style={[StyleSheet.absoluteFill, { backgroundColor: colors.glassTint }]}
         />
-        {bordered ? (
-          <View
-            pointerEvents="none"
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                borderRadius: radius,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: colors.glassBorder,
-              },
-            ]}
-          />
-        ) : null}
+        {border}
         <View
           pointerEvents="none"
           style={[styles.highlight, { backgroundColor: colors.glassHighlight }]}
         />
-        <View style={padded ? styles.content : styles.contentBare}>{children}</View>
+        {content}
       </View>
     </View>
   );

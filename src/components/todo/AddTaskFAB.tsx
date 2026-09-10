@@ -13,7 +13,7 @@ export const AddTaskFAB: React.FC<AddTaskFABProps> = ({ onPress }) => {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
-      <GlassSurface variant="sheet" radius={30} padded={false} style={styles.button}>
+      <GlassSurface variant="sheet" radius={30} padded={false} interactive style={styles.button}>
         <View style={styles.center}>
           <Ionicons name="add" size={28} color={colors.primary} />
         </View>

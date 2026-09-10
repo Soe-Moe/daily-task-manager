@@ -133,6 +133,7 @@ export const AddEditTaskScreen: React.FC<Props> = ({ navigation, route }) => {
                   radius={14}
                   padded={false}
                   elevated={false}
+                  interactive
                   style={active && { backgroundColor: `${accent}2A` }}
                 >
                   <View style={[styles.chipContent, styles.chip]}>
@@ -165,6 +166,7 @@ export const AddEditTaskScreen: React.FC<Props> = ({ navigation, route }) => {
                   radius={14}
                   padded={false}
                   elevated={false}
+                  interactive
                   style={active && { backgroundColor: `${colors.primary}26` }}
                 >
                   <View style={[styles.chipContent, styles.chip]}>
