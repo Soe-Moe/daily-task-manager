@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.mystarterapp"
+    namespace "com.dailytaskmanager"
     defaultConfig {
-        applicationId "com.mystarterapp"
+        applicationId "com.dailytaskmanager"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

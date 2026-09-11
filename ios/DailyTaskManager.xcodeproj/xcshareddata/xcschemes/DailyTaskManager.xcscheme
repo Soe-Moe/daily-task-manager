@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "MyStarterApp.app"
-               BlueprintName = "MyStarterApp"
-               ReferencedContainer = "container:MyStarterApp.xcodeproj">
+               BuildableName = "DailyTaskManager.app"
+               BlueprintName = "DailyTaskManager"
+               ReferencedContainer = "container:DailyTaskManager.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "MyStarterAppTests.xctest"
-               BlueprintName = "MyStarterAppTests"
-               ReferencedContainer = "container:MyStarterApp.xcodeproj">
+               BuildableName = "DailyTaskManagerTests.xctest"
+               BlueprintName = "DailyTaskManagerTests"
+               ReferencedContainer = "container:DailyTaskManager.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "MyStarterApp.app"
-            BlueprintName = "MyStarterApp"
-            ReferencedContainer = "container:MyStarterApp.xcodeproj">
+            BuildableName = "DailyTaskManager.app"
+            BlueprintName = "DailyTaskManager"
+            ReferencedContainer = "container:DailyTaskManager.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "MyStarterApp.app"
-            BlueprintName = "MyStarterApp"
-            ReferencedContainer = "container:MyStarterApp.xcodeproj">
+            BuildableName = "DailyTaskManager.app"
+            BlueprintName = "DailyTaskManager"
+            ReferencedContainer = "container:DailyTaskManager.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
