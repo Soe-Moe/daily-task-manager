@@ -15,6 +15,8 @@ export interface SegmentedControlProps<T extends string> {
   onChange: (value: T) => void;
 }
 
+const CHIP_HEIGHT = 44;
+
 export function SegmentedControl<T extends string>({
   options,
   value,
@@ -23,48 +25,65 @@ export function SegmentedControl<T extends string>({
   const { colors } = useTheme();
 
   return (
-    <GlassSurface variant="pill" radius={16} padded={false} elevated={false} style={styles.wrap}>
-      <View style={styles.row}>
-        {options.map((option) => {
-          const active = option.value === value;
-          return (
-            <TouchableOpacity
-              key={option.value}
-              onPress={() => onChange(option.value)}
-              style={[
-                styles.segment,
-                active && { backgroundColor: colors.primary },
-              ]}
-              activeOpacity={0.8}
+    <View style={styles.row}>
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <TouchableOpacity
+            key={option.value}
+            onPress={() => onChange(option.value)}
+            style={styles.segmentTouchable}
+            activeOpacity={0.8}
+          >
+            <GlassSurface
+              variant="pill"
+              radius={14}
+              padded={false}
+              elevated={false}
+              interactive
+              glassEffect={active ? 'clear' : 'regular'}
+              tint={active ? `${colors.primary}40` : undefined}
+              style={styles.segmentSurface}
             >
-              <Text
-                style={[
-                  Typography.labelMedium,
-                  { color: active ? colors.textInverse : colors.textMuted },
-                ]}
-              >
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </GlassSurface>
+              <View style={styles.segmentContent}>
+                <Text
+                  style={[
+                    Typography.labelMedium,
+                    {
+                      color: active ? colors.primary : colors.textMuted,
+                      fontWeight: active ? '700' : '500',
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {option.label}
+                </Text>
+              </View>
+            </GlassSurface>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: 16,
-  },
   row: {
     flexDirection: 'row',
-    padding: 4,
+    gap: 8,
+    marginBottom: 16,
   },
-  segment: {
+  segmentTouchable: {
     flex: 1,
-    paddingVertical: 8,
-    borderRadius: 12,
+  },
+  segmentSurface: {
+    height: CHIP_HEIGHT,
+    width: '100%',
+  },
+  segmentContent: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
   },
 });

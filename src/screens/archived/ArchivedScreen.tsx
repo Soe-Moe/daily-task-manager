@@ -29,7 +29,7 @@ export const ArchivedScreen: React.FC = () => {
   );
 
   return (
-    <Screen scrollable bottomInset={74}>
+    <Screen scrollable>
       <Text style={[Typography.largeTitle, { color: colors.text, marginBottom: 16 }]}>
         Archived
       </Text>
@@ -46,7 +46,7 @@ export const ArchivedScreen: React.FC = () => {
             key={todo.id}
             todo={todo}
             onToggle={toggleComplete}
-            onPress={(t) => navigation.navigate(Screens.ADD_TASK, { taskId: t.id })}
+            onPress={(t) => navigation.navigate(Screens.TASK_DETAIL, { taskId: t.id })}
             trailing="restore"
             onTrailingPress={restoreTodo}
             onDelete={deleteTodo}

@@ -1,0 +1,22 @@
+diff --git a/android/src/main/java/com/rcttabview/RCTTabView.kt b/android/src/main/java/com/rcttabview/RCTTabView.kt
+index 3c3d4bdbe2b070f8cc177f6175429fdcdf2d2304..8497f57126becdefa381fa7ebc4cfcc270410edd 100644
+--- a/android/src/main/java/com/rcttabview/RCTTabView.kt
++++ b/android/src/main/java/com/rcttabview/RCTTabView.kt
+@@ -28,6 +28,7 @@ import androidx.core.view.forEachIndexed
+ import coil3.ImageLoader
+ import coil3.asDrawable
+ import coil3.request.ImageRequest
++import coil3.request.allowHardware
+ import coil3.svg.SvgDecoder
+ import coil3.size.Precision
+ import coil3.size.Size as CoilSize
+@@ -383,6 +384,9 @@ class ReactBottomNavigationView(context: Context) : LinearLayout(context) {
+       .size(CoilSize(iconSizePx, iconSizePx))
+       .scale(Scale.FILL)
+       .precision(Precision.EXACT)
++      // Hardware bitmaps can't be captured by software-rendered blur views
++      // (e.g. @react-native-community/blur), which crashes the whole window.
++      .allowHardware(false)
+       .target { drawable ->
+         post {
+           val stateDrawable = drawable.asDrawable(context.resources)

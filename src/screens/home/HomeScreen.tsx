@@ -42,7 +42,6 @@ export const HomeScreen: React.FC = () => {
   return (
     <Screen
       scrollable
-      bottomInset={74}
       floatingAction={<AddTaskFAB onPress={() => navigation.navigate(Screens.ADD_TASK)} />}
     >
       <Text style={[Typography.bodyLarge, { color: colors.textMuted }]}>{getGreeting()}</Text>
@@ -74,7 +73,7 @@ export const HomeScreen: React.FC = () => {
             key={todo.id}
             todo={todo}
             onToggle={toggleComplete}
-            onPress={(t) => navigation.navigate(Screens.ADD_TASK, { taskId: t.id })}
+            onPress={(t) => navigation.navigate(Screens.TASK_DETAIL, { taskId: t.id })}
             trailing="archive"
             onTrailingPress={archiveTodo}
           />

@@ -1,13 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
+  ScrollView,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Screen } from '@/components/glass/Screen';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BottomSheet, BottomSheetHandle } from '@/components/glass/BottomSheet';
 import { GlassSurface } from '@/components/glass/GlassSurface';
 import { GlassTextField } from '@/components/glass/GlassTextField';
 import { useTheme } from '@/utils/useTheme';
@@ -34,6 +36,8 @@ interface DueChip {
 
 export const AddEditTaskScreen: React.FC<Props> = ({ navigation, route }) => {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const sheetRef = useRef<BottomSheetHandle>(null);
   const taskId = route.params?.taskId;
   const existing = useTodoStore((state) => (taskId ? selectTodoById(state, taskId) : undefined));
   const addTodo = useTodoStore((state) => state.addTodo);
@@ -61,6 +65,12 @@ export const AddEditTaskScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const canSave = title.trim().length > 0;
 
+  // Sheet dismissal is purely a visual animation now — the todo is saved
+  // synchronously on tap, before the sheet starts closing, so there's no
+  // dependency on state having settled by the time the animation finishes.
+  const handleClosed = () => navigation.goBack();
+
+  const handleCancel = () => sheetRef.current?.dismiss();
   const handleSave = () => {
     if (!canSave) return;
     const input = { title, notes, priority, dueDate };
@@ -69,123 +79,135 @@ export const AddEditTaskScreen: React.FC<Props> = ({ navigation, route }) => {
     } else {
       addTodo(input);
     }
-    navigation.goBack();
+    sheetRef.current?.dismiss();
   };
 
   return (
-    <Screen scrollable>
+    <BottomSheet ref={sheetRef} onClose={handleClosed}>
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={handleCancel} hitSlop={10}>
+          <Text style={[Typography.bodyLarge, { color: colors.textMuted }]}>Cancel</Text>
+        </TouchableOpacity>
+        <Text style={[Typography.titleMedium, { color: colors.text }]}>
+          {existing ? 'Edit Task' : 'New Task'}
+        </Text>
+        <TouchableOpacity onPress={handleSave} disabled={!canSave} hitSlop={10}>
+          <Text
+            style={[
+              Typography.bodyLarge,
+              { color: canSave ? colors.primary : colors.textMuted, fontWeight: '700' },
+            ]}
+          >
+            Save
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex}
       >
-        <View style={styles.topBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={10}>
-            <Text style={[Typography.bodyLarge, { color: colors.textMuted }]}>Cancel</Text>
-          </TouchableOpacity>
-          <Text style={[Typography.titleMedium, { color: colors.text }]}>
-            {existing ? 'Edit Task' : 'New Task'}
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 24 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <GlassTextField
+            label="Title"
+            placeholder="What needs to be done?"
+            value={title}
+            onChangeText={setTitle}
+            autoFocus
+            returnKeyType="next"
+          />
+
+          <GlassTextField
+            label="Notes"
+            placeholder="Add details (optional)"
+            value={notes}
+            onChangeText={setNotes}
+            multiline
+          />
+
+          <Text style={[Typography.labelMedium, { color: colors.textMuted, marginBottom: 8 }]}>
+            Priority
           </Text>
-          <TouchableOpacity onPress={handleSave} disabled={!canSave} hitSlop={10}>
-            <Text
-              style={[
-                Typography.bodyLarge,
-                { color: canSave ? colors.primary : colors.textMuted, fontWeight: '700' },
-              ]}
-            >
-              Save
-            </Text>
-          </TouchableOpacity>
-        </View>
+          <View style={styles.chipRow}>
+            {PRIORITY_OPTIONS.map((option) => {
+              const active = priority === option.value;
+              const accent =
+                option.value === 'high'
+                  ? colors.priorityHigh
+                  : option.value === 'medium'
+                  ? colors.priorityMedium
+                  : colors.priorityLow;
+              return (
+                <TouchableOpacity key={option.value} onPress={() => setPriority(option.value)}>
+                  <GlassSurface
+                    variant="pill"
+                    radius={14}
+                    padded={false}
+                    elevated={false}
+                    interactive
+                    style={active && { backgroundColor: `${accent}2A` }}
+                  >
+                    <View style={[styles.chipContent, styles.chip]}>
+                      <View style={[styles.dot, { backgroundColor: accent }]} />
+                      <Text
+                        style={[
+                          Typography.labelMedium,
+                          { color: active ? colors.text : colors.textMuted },
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </View>
+                  </GlassSurface>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
-        <GlassTextField
-          label="Title"
-          placeholder="What needs to be done?"
-          value={title}
-          onChangeText={setTitle}
-          autoFocus
-          returnKeyType="next"
-        />
-
-        <GlassTextField
-          label="Notes"
-          placeholder="Add details (optional)"
-          value={notes}
-          onChangeText={setNotes}
-          multiline
-        />
-
-        <Text style={[Typography.labelMedium, { color: colors.textMuted, marginBottom: 8 }]}>
-          Priority
-        </Text>
-        <View style={styles.chipRow}>
-          {PRIORITY_OPTIONS.map((option) => {
-            const active = priority === option.value;
-            const accent =
-              option.value === 'high'
-                ? colors.priorityHigh
-                : option.value === 'medium'
-                ? colors.priorityMedium
-                : colors.priorityLow;
-            return (
-              <TouchableOpacity key={option.value} onPress={() => setPriority(option.value)}>
-                <GlassSurface
-                  variant="pill"
-                  radius={14}
-                  padded={false}
-                  elevated={false}
-                  interactive
-                  style={active && { backgroundColor: `${accent}2A` }}
-                >
-                  <View style={[styles.chipContent, styles.chip]}>
-                    <View style={[styles.dot, { backgroundColor: accent }]} />
-                    <Text
-                      style={[
-                        Typography.labelMedium,
-                        { color: active ? colors.text : colors.textMuted },
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </View>
-                </GlassSurface>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        <Text style={[Typography.labelMedium, { color: colors.textMuted, marginTop: 20, marginBottom: 8 }]}>
-          Due date
-        </Text>
-        <View style={styles.chipRow}>
-          {dueChips.map((chip) => {
-            const active = isSameDueDate(chip.date, dueDate);
-            return (
-              <TouchableOpacity key={chip.key} onPress={() => setDueDate(chip.date)}>
-                <GlassSurface
-                  variant="pill"
-                  radius={14}
-                  padded={false}
-                  elevated={false}
-                  interactive
-                  style={active && { backgroundColor: `${colors.primary}26` }}
-                >
-                  <View style={[styles.chipContent, styles.chip]}>
-                    <Text
-                      style={[
-                        Typography.labelMedium,
-                        { color: active ? colors.primary : colors.textMuted },
-                      ]}
-                    >
-                      {chip.label}
-                    </Text>
-                  </View>
-                </GlassSurface>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+          <Text
+            style={[
+              Typography.labelMedium,
+              { color: colors.textMuted, marginTop: 20, marginBottom: 8 },
+            ]}
+          >
+            Due date
+          </Text>
+          <View style={styles.chipRow}>
+            {dueChips.map((chip) => {
+              const active = isSameDueDate(chip.date, dueDate);
+              return (
+                <TouchableOpacity key={chip.key} onPress={() => setDueDate(chip.date)}>
+                  <GlassSurface
+                    variant="pill"
+                    radius={14}
+                    padded={false}
+                    elevated={false}
+                    interactive
+                    style={active && { backgroundColor: `${colors.primary}26` }}
+                  >
+                    <View style={[styles.chipContent, styles.chip]}>
+                      <Text
+                        style={[
+                          Typography.labelMedium,
+                          { color: active ? colors.primary : colors.textMuted },
+                        ]}
+                      >
+                        {chip.label}
+                      </Text>
+                    </View>
+                  </GlassSurface>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
-    </Screen>
+    </BottomSheet>
   );
 };
 
@@ -197,7 +219,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
   },
   chipRow: {
     flexDirection: 'row',

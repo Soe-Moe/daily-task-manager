@@ -26,6 +26,12 @@ export interface GlassSurfaceProps {
   padded?: boolean;
   /** Grows and shimmers on touch. Use for tappable glass surfaces (only affects real native glass). */
   interactive?: boolean;
+  /** Square off the bottom corners — for sheets anchored flush to the screen edge. */
+  flatBottom?: boolean;
+  /** Real-glass-only: 'clear' reads as a brighter, more transparent material — use to make a segment stand out (e.g. the active pill in a segmented control). */
+  glassEffect?: 'regular' | 'clear';
+  /** Real-glass-only: overrides the tint color baked into the material (defaults to the neutral glass tint). */
+  tint?: string;
 }
 
 const VARIANT_BLUR: Record<GlassVariant, { light: GlassBlurType; dark: GlassBlurType; amount: number }> = {
@@ -43,6 +49,16 @@ const shadowStyle = (shadowColor: string): ViewStyle => ({
   elevation: 8,
 });
 
+const cornerStyle = (radius: number, flatBottom: boolean): ViewStyle =>
+  flatBottom
+    ? {
+        borderTopLeftRadius: radius,
+        borderTopRightRadius: radius,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+      }
+    : { borderRadius: radius };
+
 export const GlassSurface: React.FC<GlassSurfaceProps> = ({
   children,
   style,
@@ -52,16 +68,20 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
   elevated = true,
   padded = true,
   interactive = false,
+  flatBottom = false,
+  glassEffect = 'regular',
+  tint,
 }) => {
   const { isDark, colors } = useTheme();
+  const corners = cornerStyle(radius, flatBottom);
 
   const border = bordered ? (
     <View
       pointerEvents="none"
       style={[
         StyleSheet.absoluteFill,
+        corners,
         {
-          borderRadius: radius,
           borderWidth: StyleSheet.hairlineWidth,
           borderColor: colors.glassBorder,
         },
@@ -73,14 +93,12 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
 
   if (isLiquidGlassSupported) {
     return (
-      <View
-        style={[{ borderRadius: radius }, elevated && shadowStyle(colors.glassShadow), style]}
-      >
+      <View style={[corners, elevated && shadowStyle(colors.glassShadow), style]}>
         <LiquidGlassView
-          style={[styles.clip, { borderRadius: radius }]}
-          effect="regular"
+          style={[styles.clip, corners, { backgroundColor: colors.card }]}
+          effect={glassEffect}
           interactive={interactive}
-          tintColor={colors.glassTint}
+          tintColor={tint ?? colors.glassTint}
           colorScheme={isDark ? 'dark' : 'light'}
         >
           {border}
@@ -93,20 +111,20 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
   const blurConfig = VARIANT_BLUR[variant];
 
   return (
-    <View
-      style={[{ borderRadius: radius }, elevated && shadowStyle(colors.glassShadow), style]}
-    >
-      <View style={[styles.clip, { borderRadius: radius }]}>
+    <View style={[corners, elevated && shadowStyle(colors.glassShadow), style]}>
+      <View style={[styles.clip, corners, { backgroundColor: colors.card }]}>
         <BlurView
           style={StyleSheet.absoluteFill}
-          blurType={isDark ? blurConfig.dark : blurConfig.light}
+          blurType={
+            Platform.OS === 'android' ? (isDark ? 'dark' : 'xlight') : isDark ? blurConfig.dark : blurConfig.light
+          }
           blurAmount={blurConfig.amount}
           reducedTransparencyFallbackColor={colors.card}
           {...(Platform.OS === 'android' ? { overlayColor: colors.card } : {})}
         />
         <View
           pointerEvents="none"
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.glassTint }]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: tint ?? colors.glassTint }]}
         />
         {border}
         <View

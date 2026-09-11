@@ -34,7 +34,7 @@ export const SearchScreen: React.FC = () => {
   }, [todos, query]);
 
   return (
-    <Screen scrollable bottomInset={74}>
+    <Screen scrollable>
       <Text style={[Typography.largeTitle, { color: colors.text, marginBottom: 16 }]}>
         Search
       </Text>
@@ -51,7 +51,7 @@ export const SearchScreen: React.FC = () => {
             key={todo.id}
             todo={todo}
             onToggle={toggleComplete}
-            onPress={(t) => navigation.navigate(Screens.ADD_TASK, { taskId: t.id })}
+            onPress={(t) => navigation.navigate(Screens.TASK_DETAIL, { taskId: t.id })}
             trailing={todo.archived ? 'restore' : 'archive'}
             onTrailingPress={todo.archived ? restoreTodo : archiveTodo}
             onDelete={todo.archived ? deleteTodo : undefined}
