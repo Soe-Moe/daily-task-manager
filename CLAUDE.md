@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A React Native ToDo app ("Daily Task Manager" / `MyStarterApp`) built around a "Liquid Glass" design system: real native glass materials on iOS 26+ via `@callstack/liquid-glass`, with a blurred-glass fallback everywhere else, a native bottom tab bar, and a custom animated bottom sheet for task creation/editing.
+A React Native ToDo app ("Daily Task Manager", app identifier `DailyTaskManager` / `com.dailytaskmanager`) built around a "Liquid Glass" design system: real native glass materials on iOS 26+ via `@callstack/liquid-glass`, with a blurred-glass fallback everywhere else, a native bottom tab bar, and a custom animated bottom sheet for task creation/editing.
 
 ## Commands
 
